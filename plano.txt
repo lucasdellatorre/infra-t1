@@ -1,0 +1,7 @@
+1 - criar um indice de funcao, pois ha muitos registros com sexo e country
+
+2 - apenas um dado country, avaliar qual a melhor opcao
+
+3 - inserir um index de cluster pois estamos lidando com um intervalo
+
+4 - avaliar um indice de cluster para o intervalo, juntamente com um bitmap para os dias da semana.
