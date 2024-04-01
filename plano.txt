@@ -7,3 +7,4 @@
 4 - avaliar um indice de cluster para o intervalo, juntamente com um bitmap para os dias da semana.
 exemplo de bitmap: CREATE BITMAP INDEX idx_schedule ON Schedule(Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday);
 
+https://blogs.oracle.com/sql/post/how-to-create-and-use-indexes-in-oracle-database
