@@ -10,3 +10,4 @@ exemplo de bitmap: CREATE BITMAP INDEX idx_schedule ON Schedule(Monday, Tuesday,
 https://blogs.oracle.com/sql/post/how-to-create-and-use-indexes-in-oracle-database
 https://docs.oracle.com/cd/F49540_01/DOC/server.815/a67781/c20c_joi.htm#2598
 https://livesql.oracle.com/apex/livesql/file/tutorial_JN0V7TMEIHGVGMTUQO8ZXPZYF.html#:~:text=The%20steps%20to%20do%20a%20hash%20join%20are%3A,join%20columns%20of%20the%20second%20table%20Mais%20itens
+https://livesql.oracle.com/apex/livesql/file/tutorial_JN0XQTKBIOY98PWGVMPZ4IHZA.html
