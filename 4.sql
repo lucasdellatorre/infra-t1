@@ -22,7 +22,7 @@ até encontrar um mês que retorne alguma linha).
 --     JOIN ARRUDA.AIR_AIRPORTS_GEO airgeo ON airgeo.AIRPORT_ID = airports.AIRPORT_ID
 --     JOIN ARRUDA.AIR_FLIGHTS_SCHEDULES afs ON afs.FLIGHTNO = f.FLIGHTNO
 -- WHERE
-    -- f.ARRIVAL BETWEEN TRUNC(TO_DATE('2023-03-01', 'YYYY-MM-DD')) AND LAST_DAY(TO_DATE('2023-03-01', 'YYYY-MM-DD'))
+    -- f.DEPARTURE BETWEEN TRUNC(TO_DATE('2023-03-01', 'YYYY-MM-DD')) AND LAST_DAY(TO_DATE('2023-03-01', 'YYYY-MM-DD'))
     -- AND (
     -- afs.TUESDAY = 1
     -- OR
