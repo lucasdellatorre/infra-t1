@@ -21,4 +21,22 @@ FROM
 WHERE
     airportsgeo.COUNTRY = 'BRAZIL';
 
+DESCRIBE air_airports_geo;
+
+CREATE CLUSTER air_airports_geo_country (
+ country varchar(50)
+)
+SIZE 8K
+hashkeys 128;
+
+CREATE TABLE AIR_AIRPORTS_GEO_CL (
+    AIRPORT_ID NUMBER(5) NOT NULL ,
+    NAME VARCHAR2(50) NOT NULL,
+    CITY VARCHAR2(50), 
+    COUNTRY VARCHAR2(50), 
+    LATITUDE NUMBER(11,8) NOT NULL,
+    LONGITUDE NUMBER(11,8) NOT NULL 
+) CLUSTER air_airports_geo_country (country);
+
+INSERT INTO AIR_AIRPORTS_GEO_CL select * from AIR_AIRPORTS_GEO;
 
