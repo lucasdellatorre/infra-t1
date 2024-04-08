@@ -38,22 +38,22 @@ PLAN_TABLE_OUTPUT
 Após criar um cluster na airport_geo no campo country
 
 ----------------------------------------------------------------------------------------------
-| Id  | Operation               | Name               | Rows  | Bytes | Cost (%CPU)| Time     |
+| Id  | Operation              | Name                | Rows  | Bytes | Cost (%CPU)| Time     |
 ----------------------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT        |                    |    13 |  1235 |   102   (2)| 00:00:01 |
-|*  1 |  HASH JOIN              |                    |    13 |  1235 |   102   (2)| 00:00:01 |
-|*  2 |   HASH JOIN             |                    |    13 |  1001 |    98   (2)| 00:00:01 |
-|   3 |    TABLE ACCESS FULL    | AIR_FLIGHTS        |  1498 | 34454 |     6   (0)| 00:00:01 |
-|*  4 |    HASH JOIN            |                    |   233K|    12M|    92   (2)| 00:00:01 |
-|   5 |     TABLE ACCESS FULL   | AIR_AIRPLANES      |  5583 | 66996 |     7   (0)| 00:00:01 |
+|   0 | SELECT STATEMENT       |                     |   153 | 18360 |    35   (6)| 00:00:01 |
+|*  1 |  HASH JOIN             |                     |   153 | 18360 |    35   (6)| 00:00:01 |
+|   2 |   TABLE ACCESS FULL    | AIR_AIRPORTS        |  9854 | 49270 |    14   (0)| 00:00:01 |
+|   3 |   MERGE JOIN CARTESIAN |                     |   754K|    82M|    19   (0)| 00:00:01 |
+|*  4 |    HASH JOIN           |                     |  1498 |   109K|    19   (0)| 00:00:01 |
+|   5 |     TABLE ACCESS FULL  | AIR_AIRPLANE_TYPES  |   342 |  6156 |     3   (0)| 00:00:01 |
 
 PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                           
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-|   6 |     MERGE JOIN CARTESIAN|                    |  4718 |   193K|    84   (0)| 00:00:01 |
-|*  7 |      HASH JOIN          |                    |    42 |   840 |    37   (0)| 00:00:01 |
-|*  8 |       TABLE ACCESS FULL | AIR_AIRPORTS_GEO   |    42 |   630 |    23   (0)| 00:00:01 |
-|   9 |       TABLE ACCESS FULL | AIR_AIRPORTS       |  9854 | 49270 |    14   (0)| 00:00:01 |
-|  10 |      BUFFER SORT        |                    |   113 |  2486 |    70   (0)| 00:00:01 |
-|  11 |       TABLE ACCESS FULL | AIR_AIRLINES       |   113 |  2486 |     1   (0)| 00:00:01 |
-|  12 |   TABLE ACCESS FULL     | AIR_AIRPLANE_TYPES |   342 |  6156 |     3   (0)| 00:00:01 |
+|*  6 |     HASH JOIN          |                     |  1498 | 85386 |    16   (0)| 00:00:01 |
+|   7 |      TABLE ACCESS FULL | AIR_AIRLINES        |   113 |  2486 |     3   (0)| 00:00:01 |
+|*  8 |      HASH JOIN         |                     |  1498 | 52430 |    13   (0)| 00:00:01 |
+|   9 |       TABLE ACCESS FULL| AIR_FLIGHTS         |  1498 | 34454 |     6   (0)| 00:00:01 |
+|  10 |       TABLE ACCESS FULL| AIR_AIRPLANES       |  5583 | 66996 |     7   (0)| 00:00:01 |
+|  11 |    BUFFER SORT         |                     |   504 | 20160 |    16   (0)| 00:00:01 |
+|* 12 |     TABLE ACCESS HASH  | AIR_AIRPORTS_GEO_CL |   504 | 20160 |            |          |
 ----------------------------------------------------------------------------------------------
