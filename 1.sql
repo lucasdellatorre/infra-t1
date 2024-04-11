@@ -33,9 +33,6 @@ DROP INDEX sex_idx;
 DROP INDEX country_idx;
 DROP INDEX bday_idx;
 
-DROP CLUSTER cl_passenger_details including tables CASCADE CONSTRAINTS;
-DROP CLUSTER air_passengers_country including tables CASCADE CONSTRAINTS;
-
 ALTER TABLE AIR_PASSENGERS
 ADD PRIMARY KEY(PASSENGER_ID);
 
@@ -67,6 +64,8 @@ WHERE
     birthdate <= ADD_MONTHS(SYSDATE,-41*12)
     AND
     COUNTRY = 'BRAZIL';
+
+DROP CLUSTER air_passengers_country including tables CASCADE CONSTRAINTS;
 
 ALTER TABLE AIR_PASSENGERS_DETAILS
 DROP PRIMARY KEY;
