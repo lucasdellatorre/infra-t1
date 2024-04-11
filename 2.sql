@@ -5,21 +5,7 @@
     que saem E chegam em aeroportos localizados no país 'BRAZIL'. 
 */
 
-EXPLAIN PLAN FOR
-SELECT 
-    airlines.AIRLINE_NAME,
-    airplanes.AIRPLANE_ID,
-    airplanest.NAME as AIRPLANE_NAME_TYPE,
-    airflights.FLIGHTNO as FLIGHT_NUMBER
-FROM
-    AIR_AIRLINES airlines    
-    JOIN AIR_AIRPLANES airplanes ON airplanes.AIRLINE_ID = airlines.AIRLINE_ID
-    JOIN AIR_AIRPLANE_TYPES airplanest ON airplanest.AIRPLANE_TYPE_ID = airplanes.AIRPLANE_TYPE_ID
-    JOIN AIR_FLIGHTS airflights ON airflights.AIRPLANE_ID = airplanes.AIRPLANE_ID
-    JOIN AIR_AIRPORTS airports ON ((airports.AIRPORT_ID = airflights.FROM_AIRPORT_ID) or (airports.AIRPORT_ID = airflights.TO_AIRPORT_ID))
-    JOIN AIR_AIRPORTS_GEO airportsgeo ON airportsgeo.AIRPORT_ID = airports.AIRPORT_ID
-WHERE
-    airportsgeo.COUNTRY = 'BRAZIL';
+-- Tentativa 1
     
 ALTER TABLE AIR_AIRLINES
 DROP PRIMARY KEY;
@@ -101,11 +87,26 @@ ADD CONSTRAINT fk_airport_geo_id
 FOREIGN KEY (AIRPORT_ID)
 REFERENCES AIR_AIRPORTS(AIRPORT_ID);
 
+EXPLAIN PLAN FOR
+SELECT 
+    airlines.AIRLINE_NAME,
+    airplanes.AIRPLANE_ID,
+    airplanest.NAME as AIRPLANE_NAME_TYPE,
+    airflights.FLIGHTNO as FLIGHT_NUMBER
+FROM
+    AIR_AIRLINES airlines    
+    JOIN AIR_AIRPLANES airplanes ON airplanes.AIRLINE_ID = airlines.AIRLINE_ID
+    JOIN AIR_AIRPLANE_TYPES airplanest ON airplanest.AIRPLANE_TYPE_ID = airplanes.AIRPLANE_TYPE_ID
+    JOIN AIR_FLIGHTS airflights ON airflights.AIRPLANE_ID = airplanes.AIRPLANE_ID
+    JOIN AIR_AIRPORTS airports ON ((airports.AIRPORT_ID = airflights.FROM_AIRPORT_ID) or (airports.AIRPORT_ID = airflights.TO_AIRPORT_ID))
+    JOIN AIR_AIRPORTS_GEO airportsgeo ON airportsgeo.AIRPORT_ID = airports.AIRPORT_ID
+WHERE
+    airportsgeo.COUNTRY = 'BRAZIL';
 
 SELECT PLAN_TABLE_OUTPUT 
 FROM TABLE(DBMS_XPLAN.DISPLAY());
 
--- DROP CLUSTER
+-- Tentativa 2
 
 DROP CLUSTER air_airports_geo_country  including tables CASCADE CONSTRAINTS;
 
@@ -144,4 +145,42 @@ WHERE
     
 SELECT PLAN_TABLE_OUTPUT 
 FROM TABLE(DBMS_XPLAN.DISPLAY());
+
+-- Tentativa 3
+
+CREATE CLUSTER air_airports_geo_country (
+ country varchar(50)
+)
+INDEX;
+
+CREATE INDEX idx_cl_air_airports_geo ON CLUSTER air_airports_geo_country;
+
+CREATE TABLE AIR_AIRPORTS_GEO_CL (
+    AIRPORT_ID NUMBER(5) NOT NULL ,
+    NAME VARCHAR2(50) NOT NULL,
+    CITY VARCHAR2(50), 
+    COUNTRY VARCHAR2(50), 
+    LATITUDE NUMBER(11,8) NOT NULL,
+    LONGITUDE NUMBER(11,8) NOT NULL 
+) CLUSTER air_airports_geo_country (country);
+
+INSERT INTO AIR_AIRPORTS_GEO_CL select * from AIR_AIRPORTS_GEO;
     
+EXPLAIN PLAN FOR
+SELECT 
+    airlines.AIRLINE_NAME,
+    airplanes.AIRPLANE_ID,
+    airplanest.NAME as AIRPLANE_NAME_TYPE,
+    airflights.FLIGHTNO as FLIGHT_NUMBER
+FROM
+    AIR_AIRLINES airlines    
+    JOIN AIR_AIRPLANES airplanes ON airplanes.AIRLINE_ID = airlines.AIRLINE_ID
+    JOIN AIR_AIRPLANE_TYPES airplanest ON airplanest.AIRPLANE_TYPE_ID = airplanes.AIRPLANE_TYPE_ID
+    JOIN AIR_FLIGHTS airflights ON airflights.AIRPLANE_ID = airplanes.AIRPLANE_ID
+    JOIN AIR_AIRPORTS airports ON ((airports.AIRPORT_ID = airflights.FROM_AIRPORT_ID) or (airports.AIRPORT_ID = airflights.TO_AIRPORT_ID))
+    JOIN AIR_AIRPORTS_GEO_CL airportsgeo ON airportsgeo.AIRPORT_ID = airports.AIRPORT_ID -- linha com o cluster
+WHERE
+    airportsgeo.COUNTRY = 'BRAZIL';
+    
+SELECT PLAN_TABLE_OUTPUT 
+FROM TABLE(DBMS_XPLAN.DISPLAY());
