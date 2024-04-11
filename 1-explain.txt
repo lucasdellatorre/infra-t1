@@ -47,3 +47,16 @@ Usando um cluster de hash no country e indices nas chaves primarias e estrangeir
 |*  4 |    INDEX UNIQUE SCAN         | SYS_C00776062             |     1 |       |     0   (0)| 00:00:01 |
 |   5 |   TABLE ACCESS BY INDEX ROWID| AIR_PASSENGERS            |     1 |    20 |     1   (0)| 00:00:01 |
 ----------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------
+| Id  | Operation                    | Name                          | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT             |                               |     1 |   124 |     2   (0)| 00:00:01 |
+|   1 |  NESTED LOOPS                |                               |     1 |   124 |     2   (0)| 00:00:01 |
+|   2 |   NESTED LOOPS               |                               |     1 |   124 |     2   (0)| 00:00:01 |
+|*  3 |    TABLE ACCESS CLUSTER      | AIR_PASSENGERS_DETAILS_CL     |     1 |   104 |     1   (0)| 00:00:01 |
+|*  4 |     INDEX UNIQUE SCAN        | IDX_CL_AIR_PASSENGERS_COUNTRY |     1 |       |     1   (0)| 00:00:01 |
+|*  5 |    INDEX UNIQUE SCAN         | SYS_C00776200                 |     1 |       |     0   (0)| 00:00:01 |
+|   6 |   TABLE ACCESS BY INDEX ROWID| AIR_PASSENGERS                |     1 |    20 |     1   (0)| 00:00:01 |
+--------------------------------------------------------------------------------------------------------------
+ 
