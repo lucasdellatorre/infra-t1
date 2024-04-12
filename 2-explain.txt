@@ -18,60 +18,28 @@ Sem otimização
 |  12 |   TABLE ACCESS FULL     | AIR_AIRPLANE_TYPES |   342 |  6156 |     3   (0)| 00:00:01 |
 ----------------------------------------------------------------------------------------------
 
-Após criar um indice nas chaves estrangeiras e primarias:
+Cluster de b+tree em country:
 
-------------------------------------------------------------------------------------------------------
-| Id  | Operation                       | Name               | Rows  | Bytes | Cost (%CPU)| Time     |
-------------------------------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT                |                    |    98 |  9310 |    82   (0)| 00:00:01 |
-|   1 |  CONCATENATION                  |                    |       |       |            |          |
-|*  2 |   HASH JOIN                     |                    |    93 |  8835 |    42   (0)| 00:00:01 |
-|*  3 |    HASH JOIN                    |                    |    93 |  7161 |    39   (0)| 00:00:01 |
-|*  4 |     HASH JOIN                   |                    |    93 |  5115 |    36   (0)| 00:00:01 |
-|*  5 |      HASH JOIN                  |                    |    93 |  3999 |    29   (0)| 00:00:01 |
-|   6 |       NESTED LOOPS              |                    |   614 | 12280 |    23   (0)| 00:00:01 |
-|*  7 |        TABLE ACCESS FULL        | AIR_AIRPORTS_GEO   |   614 |  9210 |    23   (0)| 00:00:01 |
-|*  8 |        INDEX UNIQUE SCAN        | SYS_C00770071      |     1 |     5 |     0   (0)| 00:00:01 |
-|   9 |       TABLE ACCESS FULL         | AIR_FLIGHTS        |  1498 | 34454 |     6   (0)| 00:00:01 |
-|  10 |      TABLE ACCESS FULL          | AIR_AIRPLANES      |  5583 | 66996 |     7   (0)| 00:00:01 |
-|  11 |     TABLE ACCESS FULL           | AIR_AIRLINES       |   113 |  2486 |     3   (0)| 00:00:01 |
-|  12 |    TABLE ACCESS FULL            | AIR_AIRPLANE_TYPES |   342 |  6156 |     3   (0)| 00:00:01 |
-|* 13 |   HASH JOIN                     |                    |     5 |   475 |    40   (0)| 00:00:01 |
-|* 14 |    HASH JOIN                    |                    |     5 |   385 |    37   (0)| 00:00:01 |
-|  15 |     NESTED LOOPS                |                    |     5 |   275 |    34   (0)| 00:00:01 |
-|  16 |      NESTED LOOPS               |                    |     5 |   275 |    34   (0)| 00:00:01 |
-|* 17 |       HASH JOIN                 |                    |     5 |   215 |    29   (0)| 00:00:01 |
-|  18 |        NESTED LOOPS             |                    |   614 | 12280 |    23   (0)| 00:00:01 |
-|* 19 |         TABLE ACCESS FULL       | AIR_AIRPORTS_GEO   |   614 |  9210 |    23   (0)| 00:00:01 |
-|* 20 |         INDEX UNIQUE SCAN       | SYS_C00770071      |     1 |     5 |     0   (0)| 00:00:01 |
-|  21 |        TABLE ACCESS FULL        | AIR_FLIGHTS        |  1498 | 34454 |     6   (0)| 00:00:01 |
-|* 22 |       INDEX UNIQUE SCAN         | SYS_C00776146      |     1 |       |     0   (0)| 00:00:01 |
-|  23 |      TABLE ACCESS BY INDEX ROWID| AIR_AIRPLANES      |     1 |    12 |     1   (0)| 00:00:01 |
-|  24 |     TABLE ACCESS FULL           | AIR_AIRLINES       |   113 |  2486 |     3   (0)| 00:00:01 |
-|  25 |    TABLE ACCESS FULL            | AIR_AIRPLANE_TYPES |   342 |  6156 |     3   (0)| 00:00:01 |
-------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
+| Id  | Operation                 | Name                    | Rows  | Bytes | Cost (%CPU)| Time     |
+-----------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT          |                         |     1 |   120 |    37   (0)| 00:00:01 |
+|*  1 |  HASH JOIN                |                         |     1 |   120 |    37   (0)| 00:00:01 |
+|*  2 |   HASH JOIN               |                         |     1 |   102 |    34   (0)| 00:00:01 |
+|   3 |    TABLE ACCESS FULL      | AIR_FLIGHTS             |  1498 | 34454 |     6   (0)| 00:00:01 |
+|*  4 |    HASH JOIN              |                         | 22719 |  1752K|    28   (0)| 00:00:01 |
+|   5 |     MERGE JOIN CARTESIAN  |                         |   460 | 30820 |    21   (0)| 00:00:01 |
+|*  6 |      HASH JOIN            |                         |     4 |   180 |    15   (0)| 00:00:01 |
+|   7 |       TABLE ACCESS CLUSTER| AIR_AIRPORTS_GEO_CL     |     4 |   160 |     1   (0)| 00:00:01 |
+|*  8 |        INDEX UNIQUE SCAN  | IDX_CL_AIR_AIRPORTS_GEO |     1 |       |     0   (0)| 00:00:01 |
+|   9 |       TABLE ACCESS FULL   | AIR_AIRPORTS            |  9854 | 49270 |    14   (0)| 00:00:01 |
+|  10 |      BUFFER SORT          |                         |   113 |  2486 |     7   (0)| 00:00:01 |
+|  11 |       TABLE ACCESS FULL   | AIR_AIRLINES            |   113 |  2486 |     2   (0)| 00:00:01 |
+|  12 |     TABLE ACCESS FULL     | AIR_AIRPLANES           |  5583 | 66996 |     7   (0)| 00:00:01 |
+|  13 |   TABLE ACCESS FULL       | AIR_AIRPLANE_TYPES      |   342 |  6156 |     3   (0)| 00:00:01 |
+-----------------------------------------------------------------------------------------------------
 
-Após adicionar um cluster em country:
-
-----------------------------------------------------------------------------------------------
-| Id  | Operation              | Name                | Rows  | Bytes | Cost (%CPU)| Time     |
-----------------------------------------------------------------------------------------------
-|   0 | SELECT STATEMENT       |                     |   158 | 18960 |    28   (8)| 00:00:01 |
-|*  1 |  HASH JOIN             |                     |   158 | 18960 |    28   (8)| 00:00:01 |
-|   2 |   INDEX FAST FULL SCAN | SYS_C00770071       |  9854 | 49270 |     7   (0)| 00:00:01 |
-|   3 |   MERGE JOIN CARTESIAN |                     |   779K|    85M|    19   (0)| 00:00:01 |
-|*  4 |    HASH JOIN           |                     |  1498 |   109K|    19   (0)| 00:00:01 |
-|   5 |     TABLE ACCESS FULL  | AIR_AIRPLANE_TYPES  |   342 |  6156 |     3   (0)| 00:00:01 |
-|*  6 |     HASH JOIN          |                     |  1498 | 85386 |    16   (0)| 00:00:01 |
-|   7 |      TABLE ACCESS FULL | AIR_AIRLINES        |   113 |  2486 |     3   (0)| 00:00:01 |
-|*  8 |      HASH JOIN         |                     |  1498 | 52430 |    13   (0)| 00:00:01 |
-|   9 |       TABLE ACCESS FULL| AIR_FLIGHTS         |  1498 | 34454 |     6   (0)| 00:00:01 |
-|  10 |       TABLE ACCESS FULL| AIR_AIRPLANES       |  5583 | 66996 |     7   (0)| 00:00:01 |
-|  11 |    BUFFER SORT         |                     |   520 | 20800 |    16   (0)| 00:00:01 |
-|* 12 |     TABLE ACCESS HASH  | AIR_AIRPORTS_GEO_CL |   520 | 20800 |            |          |
-----------------------------------------------------------------------------------------------
-
-Trocando o cluster de hash por um cluster de b+tree:
+Adicionando chaves primarias e estrangeiras:
 
 ------------------------------------------------------------------------------------------------------------
 | Id  | Operation                        | Name                    | Rows  | Bytes | Cost (%CPU)| Time     |
@@ -85,14 +53,14 @@ Trocando o cluster de hash por um cluster de b+tree:
 |*  6 |       HASH JOIN                  |                         |     1 |    68 |     7   (0)| 00:00:01 |
 |   7 |        NESTED LOOPS              |                         |     4 |   180 |     1   (0)| 00:00:01 |
 |   8 |         TABLE ACCESS CLUSTER     | AIR_AIRPORTS_GEO_CL     |     4 |   160 |     1   (0)| 00:00:01 |
-|*  9 |          INDEX UNIQUE SCAN       | IDX_CL_AIR_AIRPORTS_GEO |     1 |       |     1   (0)| 00:00:01 |
-|* 10 |         INDEX UNIQUE SCAN        | SYS_C00770071           |     1 |     5 |     0   (0)| 00:00:01 |
+|*  9 |          INDEX UNIQUE SCAN       | IDX_CL_AIR_AIRPORTS_GEO |     1 |       |     0   (0)| 00:00:01 |
+|* 10 |         INDEX UNIQUE SCAN        | SYS_C00777398           |     1 |     5 |     0   (0)| 00:00:01 |
 |  11 |        TABLE ACCESS FULL         | AIR_FLIGHTS             |  1498 | 34454 |     6   (0)| 00:00:01 |
 |  12 |       TABLE ACCESS BY INDEX ROWID| AIR_AIRPLANES           |     1 |    12 |     1   (0)| 00:00:01 |
-|* 13 |        INDEX UNIQUE SCAN         | SYS_C00776146           |     1 |       |     0   (0)| 00:00:01 |
+|* 13 |        INDEX UNIQUE SCAN         | SYS_C00777396           |     1 |       |     0   (0)| 00:00:01 |
 |  14 |      TABLE ACCESS BY INDEX ROWID | AIR_AIRPLANE_TYPES      |     1 |    18 |     1   (0)| 00:00:01 |
-|* 15 |       INDEX UNIQUE SCAN          | SYS_C00776147           |     1 |       |     0   (0)| 00:00:01 |
-|* 16 |     INDEX UNIQUE SCAN            | SYS_C00776145           |     1 |       |     0   (0)| 00:00:01 |
+|* 15 |       INDEX UNIQUE SCAN          | SYS_C00777397           |     1 |       |     0   (0)| 00:00:01 |
+|* 16 |     INDEX UNIQUE SCAN            | SYS_C00777395           |     1 |       |     0   (0)| 00:00:01 |
 |  17 |    TABLE ACCESS BY INDEX ROWID   | AIR_AIRLINES            |     1 |    22 |     1   (0)| 00:00:01 |
 |  18 |   NESTED LOOPS                   |                         |     1 |   120 |    10   (0)| 00:00:01 |
 |  19 |    NESTED LOOPS                  |                         |     1 |   120 |    10   (0)| 00:00:01 |
@@ -101,15 +69,14 @@ Trocando o cluster de hash por um cluster de b+tree:
 |* 22 |       HASH JOIN                  |                         |     1 |    68 |     7   (0)| 00:00:01 |
 |  23 |        NESTED LOOPS              |                         |     4 |   180 |     1   (0)| 00:00:01 |
 |  24 |         TABLE ACCESS CLUSTER     | AIR_AIRPORTS_GEO_CL     |     4 |   160 |     1   (0)| 00:00:01 |
-|* 25 |          INDEX UNIQUE SCAN       | IDX_CL_AIR_AIRPORTS_GEO |     1 |       |     1   (0)| 00:00:01 |
-|* 26 |         INDEX UNIQUE SCAN        | SYS_C00770071           |     1 |     5 |     0   (0)| 00:00:01 |
+|* 25 |          INDEX UNIQUE SCAN       | IDX_CL_AIR_AIRPORTS_GEO |     1 |       |     0   (0)| 00:00:01 |
+|* 26 |         INDEX UNIQUE SCAN        | SYS_C00777398           |     1 |     5 |     0   (0)| 00:00:01 |
 |  27 |        TABLE ACCESS FULL         | AIR_FLIGHTS             |  1498 | 34454 |     6   (0)| 00:00:01 |
 |  28 |       TABLE ACCESS BY INDEX ROWID| AIR_AIRPLANES           |     1 |    12 |     1   (0)| 00:00:01 |
-|* 29 |        INDEX UNIQUE SCAN         | SYS_C00776146           |     1 |       |     0   (0)| 00:00:01 |
+|* 29 |        INDEX UNIQUE SCAN         | SYS_C00777396           |     1 |       |     0   (0)| 00:00:01 |
 |  30 |      TABLE ACCESS BY INDEX ROWID | AIR_AIRPLANE_TYPES      |     1 |    18 |     1   (0)| 00:00:01 |
-|* 31 |       INDEX UNIQUE SCAN          | SYS_C00776147           |     1 |       |     0   (0)| 00:00:01 |
-|* 32 |     INDEX UNIQUE SCAN            | SYS_C00776145           |     1 |       |     0   (0)| 00:00:01 |
+|* 31 |       INDEX UNIQUE SCAN          | SYS_C00777397           |     1 |       |     0   (0)| 00:00:01 |
+|* 32 |     INDEX UNIQUE SCAN            | SYS_C00777395           |     1 |       |     0   (0)| 00:00:01 |
 |  33 |    TABLE ACCESS BY INDEX ROWID   | AIR_AIRLINES            |     1 |    22 |     1   (0)| 00:00:01 |
 ------------------------------------------------------------------------------------------------------------
- 
  
