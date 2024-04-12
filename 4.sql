@@ -1,39 +1,112 @@
 /*
-Listar o nome da companhia aérea bem como a data e a hora de saída de todos os voos 
-que chegam para a cidade de 'NEW YORK' que partem às terças, quartas ou quintas-feiras, 
-no mês do seu aniversário  (caso a consulta não retorne nenhuma linha, faça para o mês subsequente 
-até encontrar um mês que retorne alguma linha). 
-[resposta sugerida = 1 linha para o mês de março de 2023]
+    Listar o número do voo, o nome do aeroporto de saída e o nome do aeroporto de destino, 
+    o nome completo (primeiro e último nome) e o assento de cada passageiro, 
+    para todos os voos que partem no dia do seu aniversário neste ano 
+    (caso a consulta não retorne nenhuma linha, 
+    faça para o dia subsequente até encontrar uma data que retorne alguma linha). 
 */
 
--- SELECT 
---     airlines.AIRLINE_NAME,
---     afs.MONDAY,
---     afs.ARRIVAL,
---     afs.DEPARTURE,
---     f.ARRIVAL,
---     f.DEPARTURE,
---     airgeo.CITY
--- FROM 
---     ARRUDA.AIR_AIRLINES airlines 
---     JOIN ARRUDA.AIR_AIRPLANES airplanes ON airplanes.AIRLINE_ID = airlines.AIRLINE_ID
---     JOIN ARRUDA.AIR_FLIGHTS f ON f.AIRPLANE_ID = airplanes.AIRPLANE_ID
---     JOIN ARRUDA.AIR_AIRPORTS airports ON airports.AIRPORT_ID = f.TO_AIRPORT_ID --verificar essa condicao
---     JOIN ARRUDA.AIR_AIRPORTS_GEO airgeo ON airgeo.AIRPORT_ID = airports.AIRPORT_ID
---     JOIN ARRUDA.AIR_FLIGHTS_SCHEDULES afs ON afs.FLIGHTNO = f.FLIGHTNO
--- WHERE
-    -- f.DEPARTURE BETWEEN TRUNC(TO_DATE('2023-03-01', 'YYYY-MM-DD')) AND LAST_DAY(TO_DATE('2023-03-01', 'YYYY-MM-DD'))
-    -- AND (
-    -- afs.TUESDAY = 1
-    -- OR
-    -- afs.WEDNESDAY = 1
-    -- OR  
-    -- afs.THURSDAY = 1
-    -- ) AND 
-    -- airgeo.CITY = 'NEW YORK'
-    -- ;
+EXPLAIN PLAN FOR
+SELECT
+    f.FLIGHTNO AS FLIGHT_NUMBER,
+    airport_to.NAME AS AIRPORT_TO,
+    airport_from.NAME AS AIRPORT_FROM,
+    p.FIRSTNAME || ' ' || p.LASTNAME AS FULLNAME,
+    b.SEAT,
+    f.DEPARTURE
+FROM 
+    AIR_FLIGHTS f 
+    JOIN AIR_AIRPORTS airport_to ON airport_to.AIRPORT_ID = f.TO_AIRPORT_ID
+    JOIN AIR_AIRPORTS airport_from ON airport_from.AIRPORT_ID = f.FROM_AIRPORT_ID
+    JOIN AIR_BOOKINGS b ON b.FLIGHT_ID = f.FLIGHT_ID
+    JOIN AIR_PASSENGERS p ON p.PASSENGER_ID = b.PASSENGER_ID
+WHERE 
+    f.DEPARTURE >= DATE '2023-03-25' 
+    AND 
+    f.DEPARTURE < DATE '2023-03-26';
+    
+create index idx_departure on AIR_FLIGHTS(DEPARTURE);
+
+DROP INDEX idx_from_airport_id;
+
+ALTER TABLE AIR_BOOKINGS
+ADD CONSTRAINT fk_bookings_flight_id
+FOREIGN KEY(FLIGHT_ID)
+REFERENCES AIR_FLIGHTS(FLIGHT_ID)
+
+ALTER TABLE AIR_BOOKINGS
+ADD CONSTRAINT fk_bookings_passenger_id
+FOREIGN KEY(PASSENGER_ID)
+REFERENCES AIR_PASSENGERS(PASSENGER_ID);
+
+ALTER TABLE AIR_FLIGHTS
+ADD CONSTRAINT fk_flights_from_airport_id
+FOREIGN KEY(FROM_AIRPORT_ID)
+REFERENCES AIR_AIRPORTS(AIRPORT_ID);
+
+ALTER TABLE AIR_FLIGHTS
+ADD CONSTRAINT fk_flights_to_airport_id
+FOREIGN KEY(TO_AIRPORT_ID)
+REFERENCES AIR_AIRPORTS(AIRPORT_ID);
+    
+ALTER TABLE AIR_FLIGHTS
+ADD PRIMARY KEY(FLIGHT_ID);    
+
+ALTER TABLE AIR_AIRPORTS
+ADD PRIMARY KEY(AIRPORT_ID);
+
+ALTER TABLE AIR_BOOKINGS
+ADD PRIMARY KEY(BOOKING_ID);    
+
+ALTER TABLE AIR_PASSENGERS
+ADD PRIMARY KEY(PASSENGER_ID);    
+
+--describe air_flights;
+--
+--CREATE CLUSTER air_flights_departure (
+--    departure TIMESTAMP(6)
+--)
+--SIZE 8K
+--hashkeys 128;
+--
+--DROP CLUSTER air_flights_departure including tables cascade constraints;
+--
+--CREATE TABLE AIR_FLIGHTS_CL (
+--    FLIGHT_ID       NUMBER(10) NOT NULL,
+--    FLIGHTNO        CHAR(8) NOT NULL,
+--    AIRLINE_ID      NUMBER(5) NOT NULL,
+--    FROM_AIRPORT_ID NUMBER(5) NOT NULL,
+--    TO_AIRPORT_ID   NUMBER(5) NOT NULL,
+--    AIRPLANE_ID     NUMBER(5) NOT NULL,
+--    DEPARTURE       TIMESTAMP(6) NOT NULL,
+--    ARRIVAL         TIMESTAMP(6) NOT NULL,
+--    CONSTRAINT pk_air_flights_cl PRIMARY KEY (FLIGHT_ID)
+--) cluster air_flights_departure(departure);
+--
+--insert into air_flights_cl select * from AIR_FLIGHTS;
+
+EXPLAIN PLAN FOR
+SELECT
+    f.FLIGHTNO AS FLIGHT_NUMBER,
+    airport_to.NAME AS AIRPORT_TO,
+    airport_from.NAME AS AIRPORT_FROM,
+    p.FIRSTNAME || ' ' || p.LASTNAME AS FULLNAME,
+    b.SEAT,
+    f.DEPARTURE
+FROM 
+    AIR_FLIGHTS f 
+    JOIN AIR_AIRPORTS airport_to ON airport_to.AIRPORT_ID = f.TO_AIRPORT_ID
+    JOIN AIR_AIRPORTS airport_from ON airport_from.AIRPORT_ID = f.FROM_AIRPORT_ID
+    JOIN AIR_BOOKINGS b ON b.FLIGHT_ID = f.FLIGHT_ID
+    JOIN AIR_PASSENGERS p ON p.PASSENGER_ID = b.PASSENGER_ID
+WHERE 
+    f.DEPARTURE BETWEEN TRUNC(TO_DATE('2023-03-25', 'YYYY-MM-DD')) AND (TRUNC(TO_DATE('2023-03-26', 'YYYY-MM-DD'))-(1/(24*60*60)));
 
 
+SELECT PLAN_TABLE_OUTPUT 
+FROM TABLE(DBMS_XPLAN.DISPLAY());
+
+EXPLAIN PLAN FOR
 SELECT 
     airlines.AIRLINE_NAME,
     afs.MONDAY,
@@ -43,12 +116,12 @@ SELECT
     f.DEPARTURE,
     airgeo.CITY
 FROM 
-    ARRUDA.AIR_FLIGHTS_SCHEDULES afs 
-    JOIN ARRUDA.AIR_AIRLINES airlines ON airlines.AIRLINE_ID = afs.AIRLINE_ID
-    JOIN ARRUDA.AIR_FLIGHTS f ON f.FLIGHTNO = afs.FLIGHTNO
-    JOIN ARRUDA.AIR_AIRPORTS airports ON airports.AIRPORT_ID = f.TO_AIRPORT_ID  
-    JOIN ARRUDA.AIR_AIRPORTS_GEO airgeo ON airgeo.AIRPORT_ID = airports.AIRPORT_ID
-    JOIN ARRUDA.AIR_FLIGHTS_SCHEDULES afs ON afs.FLIGHTNO = f.FLIGHTNO
+    AIR_FLIGHTS_SCHEDULES afs 
+    JOIN AIR_AIRLINES airlines ON airlines.AIRLINE_ID = afs.AIRLINE_ID
+    JOIN AIR_FLIGHTS f ON f.FLIGHTNO = afs.FLIGHTNO
+    JOIN AIR_AIRPORTS airports ON airports.AIRPORT_ID = f.TO_AIRPORT_ID  
+    JOIN AIR_AIRPORTS_GEO_CL2 airgeo ON airgeo.AIRPORT_ID = airports.AIRPORT_ID
+    JOIN AIR_FLIGHTS_SCHEDULES afs ON afs.FLIGHTNO = f.FLIGHTNO
 WHERE
     f.DEPARTURE BETWEEN TRUNC(TO_DATE('2023-03-01', 'YYYY-MM-DD')) AND LAST_DAY(TO_DATE('2023-03-01', 'YYYY-MM-DD'))
     AND (
@@ -57,9 +130,45 @@ WHERE
     afs.WEDNESDAY = 1
     OR  
     afs.THURSDAY = 1
-    ) AND 
-    airgeo.CITY = 'NEW YORK'
-    ;
+    ) 
+    AND 
+    airgeo.CITY = 'NEW YORK';
+
+SELECT PLAN_TABLE_OUTPUT 
+FROM TABLE(DBMS_XPLAN.DISPLAY());
+    
+create bitmap index idx_tuesday on AIR_FLIGHTS_SCHEDULES(TUESDAY);
+create bitmap index idx_wednesday on AIR_FLIGHTS_SCHEDULES(WEDNESDAY);
+create bitmap index idx_thursday on AIR_FLIGHTS_SCHEDULES(THURSDAY);
+create index idx_city on AIR_AIRPORTS_GEO(CITY);
+
+DROP CLUSTER air_airports_geo_country  including tables CASCADE CONSTRAINTS;
+
+CREATE CLUSTER air_airports_geo_city_cl (
+ CITY varchar2(50)
+)
+SIZE 8K
+hashkeys 128;
+
+CREATE TABLE AIR_AIRPORTS_GEO_CL2 (
+    AIRPORT_ID NUMBER(5) NOT NULL,
+    NAME VARCHAR2(50) NOT NULL,
+    CITY VARCHAR2(50) not null,
+    COUNTRY VARCHAR2(50) not null,
+    LATITUDE NUMBER(11,8) NOT NULL,
+    LONGITUDE NUMBER(11,8) NOT NULL
+) cluster air_airports_geo_city_cl(city);
+
+insert into AIR_AIRPORTS_GEO_CL2 select * from AIR_AIRPORTS_GEO;
+
+DELETE FROM AIR_AIRPORTS_GEO WHERE CITY IS NULL;
 
 
--- duvida: flights schedules o valor de departure e arrive eh sempre o mesmo
+
+describe AIR_AIRPORTS_GEO;
+
+drop index idx_tuesday;
+drop index idx_wednesday;
+drop index idx_thursday;
+drop index idx_city;
+
