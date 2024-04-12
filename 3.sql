@@ -6,7 +6,7 @@
     faça para o dia subsequente até encontrar uma data que retorne alguma linha). 
 */
 
-    SELECT
+   SELECT
         f.FLIGHTNO AS FLIGHT_NUMBER,
         airport_to.NAME AS AIRPORT_TO,
         airport_from.NAME AS AIRPORT_FROM,
@@ -15,9 +15,9 @@
         f.DEPARTURE
     FROM 
         ARRUDA.AIR_FLIGHTS f 
-        JOIN ARRUDA.AIR_AIRPORTS airport_to ON airport_to.AIRPORT_ID = f.TO_AIRPORT_ID
-        JOIN ARRUDA.AIR_AIRPORTS airport_from ON airport_from.AIRPORT_ID = f.FROM_AIRPORT_ID
-        JOIN ARRUDA.AIR_BOOKINGS b ON b.FLIGHT_ID = f.FLIGHT_ID
-        JOIN ARRUDA.AIR_PASSENGERS p ON p.PASSENGER_ID = b.PASSENGER_ID
+        JOIN AIR_AIRPORTS airport_to ON airport_to.AIRPORT_ID = f.TO_AIRPORT_ID
+        JOIN AIR_AIRPORTS airport_from ON airport_from.AIRPORT_ID = f.FROM_AIRPORT_ID
+        JOIN AIR_BOOKINGS b ON b.FLIGHT_ID = f.FLIGHT_ID
+        JOIN AIR_PASSENGERS p ON p.PASSENGER_ID = b.PASSENGER_ID
     WHERE 
         f.DEPARTURE BETWEEN TRUNC(TO_DATE('2023-03-25', 'YYYY-MM-DD')) AND (TRUNC(TO_DATE('2023-03-26', 'YYYY-MM-DD'))-(1/(24*60*60)));
